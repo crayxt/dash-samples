@@ -64,7 +64,7 @@ chart3 = dbc.Card(
 
 app.layout = dbc.Container(
     [
-        html.H2("Comparison of html Select and dcc Dropdown"),
+        html.H2("Comparison of html Select, dcc Dropdown and dcc Checkboxes"),
         html.Hr(),
         dbc.Row(
             [
