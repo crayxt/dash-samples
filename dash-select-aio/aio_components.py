@@ -33,7 +33,8 @@ class SelectWithMemoryAIO(html.Div):  # html.Div will be the "parent" component
         header,
         select_props={},
         storage_props={},
-        aio_id=None
+        aio_id=None,
+        storage_visible=False
     ):
         # Allow developers to pass in their own `aio_id` if they're
         # binding their own callback to a particular component.
@@ -59,11 +60,16 @@ class SelectWithMemoryAIO(html.Div):  # html.Div will be the "parent" component
         else:
             opts = []
 
+        if storage_visible:
+            storage_style=dict(display="block")
+        else:
+            storage_style=dict(display="none")
+        print(storage_visible, storage_style, storage_props)
         # Define the component's layout
         super().__init__([  # Equivalent to `html.Div([...])`
             html.Label(header, id=self.ids.label(aio_id)),
             html.Select(opts, id=self.ids.select(aio_id), **select_props),
-            dcc.Input(id=self.ids.storage(aio_id), style=dict(display="block", width="150px"), **storage_props)
+            dcc.Input(id=self.ids.storage(aio_id), style=storage_style, **storage_props)
         ])
 
     clientside_callback(

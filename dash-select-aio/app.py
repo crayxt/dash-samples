@@ -28,10 +28,9 @@ chart1 = dbc.Card(
         html.Label("Hold Shift/Ctrl to select multiple values"),
         dbc.Row(
             [
-                dbc.Col([SelectWithMemoryAIO("", aio_id='aio1', select_props=dict(options=df['ID'].unique(), className="form-select", size=15, multiple=True)),
-                         html.Label('Above field is hidden by default')
-                        ], width=4),
-                dbc.Col(dcc.Graph(id="graph1", figure={}), width=8),
+                dbc.Col([SelectWithMemoryAIO("", aio_id='aio1', select_props=dict(options=df['ID'].unique(), className="form-select", size=16, multiple=True), storage_visible=False)
+                        ], width=3),
+                dbc.Col(dcc.Graph(id="graph1", figure={}), width=9),
             ]),
     ],
     body=True,
@@ -43,7 +42,7 @@ chart2 = dbc.Card(
         dbc.Row(
             [
                 dcc.Dropdown([{'label': c, 'value': c} for c in df['ID'].unique()], id="plot2", multi=True),
-                dbc.Col(dcc.Graph(id="graph2", figure={}), width=8),
+                dcc.Graph(id="graph2", figure={}),
             ]),
     ],
     body=True,
@@ -55,7 +54,7 @@ chart3 = dbc.Card(
         dbc.Row(
             [
                 dcc.Checklist(df['ID'].unique(), [], id="plot3", inline=True),
-                dbc.Col(dcc.Graph(id="graph3", figure={}), width=8),
+                dcc.Graph(id="graph3", figure={}),
             ]),
     ],
     body=True,
@@ -64,8 +63,9 @@ chart3 = dbc.Card(
 
 app.layout = dbc.Container(
     [
-        html.H2("Comparison of html Select, dcc Dropdown and dcc Checkboxes"),
+        html.H2("Comparison of AIO based on (html.Select), dcc.Dropdown and dcc.Checklist"),
         html.Hr(),
+        html.P("Consider cases when you need to select custom ranges, like A:B, K:N, etc."),
         dbc.Row(
             [
                 dbc.Col(chart1, id="chart1", width=4),
