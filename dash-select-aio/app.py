@@ -11,8 +11,8 @@ import pandas as pd
 import numpy as np
 
 # Prepare data
-a = np.random.rand(16,2).round(4) * 100
-b = np.tile(['A', 'B', 'C', 'D'], 4)
+a = np.random.rand(60,2).round(4) * 100
+b = np.tile(['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O'], 4)
 df = pd.DataFrame(a, columns=["X", "Y"])
 df['ID'] = b
 df = df.sort_values(by=['ID', 'X'])
@@ -28,10 +28,8 @@ chart1 = dbc.Card(
         html.Label("Hold Shift/Ctrl to select multiple values"),
         dbc.Row(
             [
-                dbc.Col([SelectWithMemoryAIO("", aio_id='aio1', select_props=dict(options=df['ID'].unique(), className="form-select", size=10, multiple=True)),
-                         html.Label('Above field is hidden by default'),
-                         html.Br(),
-                         dbc.Button("Plot", id="plot1")
+                dbc.Col([SelectWithMemoryAIO("", aio_id='aio1', select_props=dict(options=df['ID'].unique(), className="form-select", size=15, multiple=True)),
+                         html.Label('Above field is hidden by default')
                         ], width=4),
                 dbc.Col(dcc.Graph(id="graph1", figure={}), width=8),
             ]),
@@ -44,12 +42,25 @@ chart2 = dbc.Card(
         html.Label("Standard dcc.Dropdown"),
         dbc.Row(
             [
-                dbc.Col([dcc.Dropdown([{'label': c, 'value': c} for c in df['ID'].unique()], id="plot2", multi=True)], width=4),
+                dcc.Dropdown([{'label': c, 'value': c} for c in df['ID'].unique()], id="plot2", multi=True),
                 dbc.Col(dcc.Graph(id="graph2", figure={}), width=8),
             ]),
     ],
     body=True,
 )
+
+chart3 = dbc.Card(
+    [
+        html.Label("Standard dcc.Checbox"),
+        dbc.Row(
+            [
+                dcc.Checklist(df['ID'].unique(), [], id="plot3", inline=True),
+                dbc.Col(dcc.Graph(id="graph3", figure={}), width=8),
+            ]),
+    ],
+    body=True,
+)
+
 
 app.layout = dbc.Container(
     [
@@ -57,8 +68,9 @@ app.layout = dbc.Container(
         html.Hr(),
         dbc.Row(
             [
-                dbc.Col(chart1, id="chart1", width=6),
-                dbc.Col(chart2, id="chart2", width=6),
+                dbc.Col(chart1, id="chart1", width=4),
+                dbc.Col(chart2, id="chart2", width=4),
+                dbc.Col(chart3, id="chart3", width=4),
             ],
             align="top",
         ),
@@ -69,13 +81,11 @@ app.layout = dbc.Container(
 
 @app.callback(
     Output('graph1', 'figure'),
-    Input('plot1', 'n_clicks'),
-    State(SelectWithMemoryAIO.ids.storage('aio1'),   'value')
+    Input(SelectWithMemoryAIO.ids.storage('aio1'), 'value')
 )
-def plot1(n, val):
-    print(n, val)
+def plot1(val):
     val = val.split(",") if val else []
-    if not n:
+    if not val:
         return {}
     dff = df.loc[df.ID.isin(val)]
     fig = px.scatter(dff, x='X', y='Y', color='ID')
@@ -87,6 +97,19 @@ def plot1(n, val):
     Input('plot2', 'value'),
 )
 def plot2(val):
+    if not val:
+        return {}
+    print(val)
+    dff = df.loc[df.ID.isin(val)]
+    fig = px.scatter(dff, x='X', y='Y', color='ID')
+    #print(fig)
+    return fig
+
+@app.callback(
+    Output('graph3', 'figure'),
+    Input('plot3', 'value'),
+)
+def plot3(val):
     if not val:
         return {}
     print(val)
