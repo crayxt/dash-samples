@@ -13,6 +13,11 @@ class SelectWithMemoryAIO(html.Div):  # html.Div will be the "parent" component
             'subcomponent': 'label',
             'aio_id': aio_id
         }
+        filtr = lambda aio_id: {
+            'component': 'SelectWithMemoryAIO',
+            'subcomponent': 'filtr',
+            'aio_id': aio_id
+        }
         select = lambda aio_id: {
             'component': 'SelectWithMemoryAIO',
             'subcomponent': 'select',
@@ -55,7 +60,7 @@ class SelectWithMemoryAIO(html.Div):  # html.Div will be the "parent" component
         #    markdown_props['children'] = text
 
         if 'options' in select_props:
-            opts = [html.Option(c) for c in select_props['options'] if c]
+            opts = [html.Option(c, hidden=False) for c in select_props['options'] if c]
             del select_props['options']
         else:
             opts = []
@@ -68,6 +73,7 @@ class SelectWithMemoryAIO(html.Div):  # html.Div will be the "parent" component
         # Define the component's layout
         super().__init__([  # Equivalent to `html.Div([...])`
             html.Label(header, id=self.ids.label(aio_id)),
+            dcc.Input(id=self.ids.filtr(aio_id)),
             html.Select(opts, id=self.ids.select(aio_id), **select_props),
             dcc.Input(id=self.ids.storage(aio_id), style=storage_style, **storage_props)
         ])
@@ -87,6 +93,38 @@ class SelectWithMemoryAIO(html.Div):  # html.Div will be the "parent" component
         Output(ids.storage(MATCH), 'value'),
         [Input(ids.select(MATCH), 'n_clicks'),
         Input(ids.select(MATCH), 'id')]
+    )
+
+    clientside_callback(
+        """
+        function(flt, id, vals) {
+            console.log(vals);
+            if (!flt || flt.length === 0 ) {
+                return vals;
+            };
+            for (let i=0; i<vals.length; i++) {
+                var name = vals[i]["props"]["children"];
+                if (name.includes(flt)) {
+                    vals[i]["props"]["hidden"] = false;
+                    console.log(flt, name);
+                } else {
+                    vals[i]["props"]["hidden"] = true;
+                };
+            };
+            //var id = JSON.stringify(id);
+            //var items = document.getElementById(id).selectedOptions;
+            //var out = [];
+            //for (let i=0; i<items.length; i++) {
+            //    out.push(items[i].value);
+            //};
+            console.log(vals);
+            return vals
+        }
+        """,
+        Output(ids.select(MATCH), 'children'),
+        Input(ids.filtr(MATCH), 'value'),
+        [State(ids.select(MATCH), 'id'),
+        State(ids.select(MATCH), 'children')]
     )
 
 if __name__ == "__main__":
